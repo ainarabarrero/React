@@ -1,11 +1,14 @@
-ul{
-  font-family: Arial, Helvetica, sans-serif;
-  list-style: square;
-  background-color: rgb(105, 227, 214);
+.Contenedor-incidencias{
+  display: flex;
+}
+main{
+  flex:1;
+  padding: 20px;
+  border:20px solid rgb(111, 111, 209);
 }
 
-h4{
-  text-decoration: underline;
-  font-family: Arial, Helvetica, sans-serif;
-  font-weight: bold;
+aside{
+  width: 600px;
+  padding: 20px;
+  border:20px solid rgb(111, 111, 209);
 }
