@@ -1,13 +1,12 @@
 import './App.css';
 import Header from '../header/Header';
 import Footer from '../footer/Footer';
-import React from 'react';
 import MiLista from '../lista/MiLista';
 import Form from '../Form';
+import React, {useState} from "react";
 
-class App extends React.Component {
-  state = {
-    incidencias: [
+function App() {
+  const [incidencias, setIncidencia] = useState([
   
 
         {
@@ -54,16 +53,16 @@ class App extends React.Component {
             estado:"Abierta",
             ubicacion:"B106"
         }
-    ]}
+    ]);
 
-   agregarIncidencia=( titulo_nuevo, usuario_nuevo, descripcion_nuevo, categoria_nuevo,nivel_urgencia_nuevo, ubicacion_nuevo)=>{
+   const agregarIncidencia=( titulo_nuevo, usuario_nuevo, descripcion_nuevo, categoria_nuevo,nivel_urgencia_nuevo, ubicacion_nuevo)=>{
       const fecha= new Date();
       const year = fecha.getFullYear();
       const month = String(fecha.getMonth()+1).padStart(2,'0');
       const day = String (fecha.getDate()).padStart(2,'0');
       const fecha_formateada= year+ "-" + month + "-" + day;
       const nueva_incidencia= {
-        id_incidencia: this.state.incidencias.length +1,
+        id_incidencia: incidencias.length +1,
         id_usuario: usuario_nuevo,
         titulo: titulo_nuevo,
         descripcion: descripcion_nuevo,
@@ -73,21 +72,23 @@ class App extends React.Component {
         estado: "Abierta",
         ubicacion: ubicacion_nuevo
       }
-      console.log("Nueva incidencia",nueva_incidencia);
-      this.setState({incidencias:[...this.state.incidencias, nueva_incidencia]})
+      setIncidencia([...incidencias,nueva_incidencia]);
+      console.log("Datos recibidos",nueva_incidencia);
+      
     }
-  render(){
+
   return (
     <>
     <Header/>
     <h2>Mi aplicacion </h2>
-     <p>Este es mi contenido de la app</p>
+     
     <div className="Contenedor-incidencias">
       <main>
-          <MiLista incidencias={this.state.incidencias}/>
+        <p>Este es mi contenido de la app</p>
+          <MiLista incidencias={incidencias}/>
           </main>
         <aside>
-       <Form agregarIncidencia={this.agregarIncidencia}/>
+       <Form agregarIncidencia={agregarIncidencia}/>
         </aside>
     </div>
     <Footer/>
@@ -95,5 +96,5 @@ class App extends React.Component {
 
   );
 }
-}
+
 export default App;

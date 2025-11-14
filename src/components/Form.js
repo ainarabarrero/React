@@ -1,21 +1,26 @@
-import React from "react";
+import {useState} from "react";
 import './Form.css'
 
-class Form extends React.Component{
+function Form (props){
 
-    envioFormulario=(event)=>{
+    const envioFormulario = (event)=>{
         event.preventDefault();
         const form= event.target;
-        this.props.agregarIncidencia( form.titulo.value, form.usuario.value, form.descripcion.value,
-            form.categoria.value, form.nivel.value, form.ubicacion.value
+        props.agregarIncidencia( 
+            form.titulo.value, 
+            form.usuario.value, 
+            form.descripcion.value,
+            form.categoria.value,
+            form.nivel.value,
+            form.ubicacion.value
         )
     }
 
-    render(){
+    
         return(
             <div>
                 <h2>Registrar incidencia</h2>
-                <form onSubmit={this.envioFormulario}>
+                <form onSubmit={envioFormulario}>
                     
 
                     <div className="elemento-form">
@@ -67,5 +72,5 @@ class Form extends React.Component{
             </div>
         )
     }
-}
+
 export default Form;
