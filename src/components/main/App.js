@@ -1,9 +1,9 @@
-import './App.css';
 import Header from '../header/Header';
 import Footer from '../footer/Footer';
-import MiLista from '../lista/MiLista';
+import MiLista from '../lista/IncidentList';
 import Form from '../Form';
 import React, {useState} from "react";
+import Fondo from '../img/fondo-vector-monocromo-blanco-abstracto-folleto-diseno-folleto-sitio-web-fondo-pantalla-blanco-geometrico-pagina-inicio-presentacion-certificado_249611-5879.avif' 
 
 function App() {
   const [incidencias, setIncidencia] = useState([
@@ -78,21 +78,21 @@ function App() {
     }
 
   return (
-    <>
+    <div className='card' style={{backgroundImage: `url(${Fondo})`, backgroundSize: "cover", backgroundRepeat: "no-repeat"}}>
     <Header/>
-    <h2>Mi aplicacion </h2>
+    <h2 className='mb-4 text-center'>Mi aplicación </h2>
      
-    <div className="Contenedor-incidencias">
-      <main>
-        <p>Este es mi contenido de la app</p>
+    <div className="container-fluid mt-4 row">
+      <main className='col-md-6'>
+        <p>Esta aplicacion muestra el contenido almacenado en mi app</p>
           <MiLista incidencias={incidencias}/>
           </main>
-        <aside>
+        <aside className='col-md-6'>
        <Form agregarIncidencia={agregarIncidencia}/>
         </aside>
     </div>
     <Footer/>
-    </>
+    </div>
 
   );
 }

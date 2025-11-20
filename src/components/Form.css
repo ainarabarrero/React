@@ -1,18 +1,12 @@
-.elemento-form{
-  padding: 20px;
-  border: 1px solid blue;
+.btn.btn-success.mx-auto.d-grid{
+    background-color: rgb(10, 10, 10) ;
+    color: white ;
 }
-label{
-    font-weight: bold;
-    padding-right: 10px;
+
+.text-titulopersonalizado-verde{
+    background-color: rgb(205, 204, 204);
 }
-input:hover{
-    background-color: black;
-    color:white;
-}
-.elemento-form-button{
-    background-color: black;
-    color: white;
-    border-radius: 20px;
-    padding: 10px;
+
+.mb-3.form-control{
+ background-color:#c4c4c4ff ;
 }
