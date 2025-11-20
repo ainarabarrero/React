@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "../../../../Documents/RepasoHTML"
+		},
+		{
+			"path": "../../../../Documents/RepasoJavaScript"
+		},
+		{
+			"path": "../../.."
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "RepasoJavaScript"
+	}
+}
