@@ -1,5 +1,3 @@
-
-
 function MiLista (props) {   
 
     return(
