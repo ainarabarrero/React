@@ -1,235 +1,142 @@
- import Header from '../header/Header';
-
+import Header from '../header/Header';
 import Footer from '../footer/Footer';
-
-import IncidentList from '../lista/IncidentList';
-
+import MiLista from '../lista/IncidentList';
 import Form from '../Form';
-
-import React, { useEffect, useState } from "react";
-
-import Fondo from '../img/fondo-vector-monocromo-blanco-abstracto-folleto-diseno-folleto-sitio-web-fondo-pantalla-blanco-geometrico-pagina-inicio-presentacion-certificado_249611-5879.avif'; 
-
- function App() {
-
-    const INCIDENCIA_API_URL = 'http://localhost:3004/incidencias';
-
-    const USUARIO_API_URL = 'http://localhost:3004/users';
-
-    const [usuarios, setUsuarios] = useState([]);
-
-    const [incidencias, setIncidencias] = useState([]);
-
-
-    useEffect(() => {
-
-        const obtenerIncidencias = async () => {
-
-            try {
-
-                let response = await fetch(INCIDENCIA_API_URL);
-
-                if (!response.ok) throw new Error("HTTP Error");
-
-                const data = await response.json();
-
-                setIncidencias(data);
-
-            } catch (e) {
-
-                console.error("Error al cargar las incidencias:", e);
-
-            }
-
-        };
-
-
-        const obtenerUsuarios = async () => {
-
-            try {
-
-                let response = await fetch(USUARIO_API_URL);
-
-                if (!response.ok) throw new Error("HTTP Error");
-
-                const data = await response.json();
-
-                console.log("Usuarios obtenidos del servidor:", data);
-
-                setUsuarios(data);
-
-            } catch (e) {
-
-                console.error("Error al cargar los usuarios:", e);
-
-            }
-
-        };
-
-
-        obtenerIncidencias();
-
-        obtenerUsuarios();
-
-    }, []);
-
-
-    const agregarIncidencia = async (incidencia) => {
-
-        try {
-
-            const fecha = new Date();
-
-            const year = fecha.getFullYear();
-
-            const month = String(fecha.getMonth() + 1).padStart(2, '0');
-
-            const day = String(fecha.getDate()).padStart(2, '0');
-
-            const fecha_formateada = `${year}-${month}-${day}`;
-
-
-            // Debug: ver qué usuarios tenemos y qué email buscamos
-
-            console.log("Usuarios cargados:", usuarios);
-
-            console.log("Email buscado:", incidencia.usuario.email);
-
-            
-
-            // Normalizar emails (quitar espacios y convertir a minúsculas)
-
-            const emailBuscado = incidencia.usuario.email.trim().toLowerCase();
-
-            let usuarioEncontrado = usuarios.find(u => u.email.trim().toLowerCase() === emailBuscado);
-
-            
-
-            console.log("Usuario encontrado:", usuarioEncontrado);
-
-            
-
-            if (!usuarioEncontrado) {
-
-                alert(`Usuario no encontrado. Email buscado: ${emailBuscado}\nUsuarios disponibles: ${usuarios.map(u => u.email).join(', ')}`);
-
-                return;
-
-            }
-
-
-            const nuevaIncidencia = {
-
-                ...incidencia,
-
-                usuario: usuarioEncontrado,
-
-                fecha_registro: fecha_formateada,
-
-                estado: "Abierta",
-
-                comentarios: []
-
-            };
-
-
-            let response = await fetch(INCIDENCIA_API_URL, {
-
-                method: 'POST',
-
-                headers: { 'Content-Type': 'application/json' },
-
-                body: JSON.stringify(nuevaIncidencia)
-
-            });
-
-
-            if (response.ok) {
-
-                let data = await response.json();
-
-                console.log("Nueva Incidencia: ", data);
-
-                // Usar función callback para asegurar que usamos el estado más actual
-
-                setIncidencias(prevIncidencias => [...prevIncidencias, data]);
-
-                alert("Incidencia agregada correctamente");
-
-            } else {
-
-                alert("Error al agregar la incidencia");
-
-            }
-
-        } catch (e) {
-
-            console.error("Falló la petición POST de la incidencia", e.message);
-
-            alert("Error al conectar con el servidor");
-
-        }
-
+import Login from '../Login';
+import React, { useState, useEffect } from "react";
+import Fondo from '../img/fondo-vector-monocromo-blanco-abstracto-folleto-diseno-folleto-sitio-web-fondo-pantalla-blanco-geometrico-pagina-inicio-presentacion-certificado_249611-5879.avif'
+
+const LOGIN_API_URL = "http://localhost:3004/login";
+const USERS_API_URL = "http://localhost:3004/users";
+
+function App() {
+  const [usuarioLogueado, setUsuarioLogueado] = useState(null);
+  const [usuarios, setUsuarios] = useState([]);
+  const [incidencias, setIncidencia] = useState([
+    {
+      id_incidencia: 1,
+      id_usuario: "gme60348",
+      titulo: "Proyecto averiado en el aula 2",
+      descripcion: "Proyecto averiado en el aula 2",
+      categoria: "Hardware",
+      nivel_urgencia: "Media",
+      fecha_registro: "2025-10-20",
+      estado: "Abierta",
+      ubicacion: "B205"
     }
+  ]);
 
+  // 1. Cargar lista de usuarios al arrancar
+  useEffect(() => {
+    fetch(USERS_API_URL)
+      .then(res => res.json())
+      .then(data => setUsuarios(data))
+      .catch(err => console.error("Error cargando usuarios:", err));
+  }, []);
 
-    return (
+  // 2. Persistencia manual (Sin librerías)
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (token && usuarios.length > 0) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
 
-        <div
+        const decoded = JSON.parse(jsonPayload);
+        const usuarioEncontrado = usuarios.find(u => u.email === decoded.email);
+        
+        if (usuarioEncontrado) {
+          setUsuarioLogueado(usuarioEncontrado);
+        }
+      } catch (error) {
+        localStorage.removeItem("authToken");
+      }
+    }
+  }, [usuarios]);
 
-            style={{
+  const onLogin = async (email, password) => {
+    try {
+      const response = await fetch(LOGIN_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
 
-                backgroundImage: `url(${Fondo})`,
+      if (!response.ok) throw new Error("Credenciales incorrectas");
 
-                backgroundSize: "cover",
+      const userData = await response.json();
+      localStorage.setItem("authToken", userData.accessToken);
+      localStorage.removeItem("usuarioLogin"); // Limpieza de la clave antigua
+      setUsuarioLogueado(userData.user);
+    } catch (error) {
+      alert("Error: " + error.message);
+    }
+  };
 
-                backgroundRepeat: "no-repeat",
+  const onLogout = () => {
+    localStorage.removeItem("authToken");
+    setUsuarioLogueado(null);
+  };
 
-                minHeight: "100vh"
+  const agregarIncidencia = (titulo, usuario, descripcion, categoria, urgencia, ubicacion) => {
+    const nueva = {
+      id_incidencia: incidencias.length + 1,
+      id_usuario: usuario,
+      titulo, descripcion, categoria, nivel_urgencia: urgencia,
+      fecha_registro: new Date().toISOString().split("T")[0],
+      estado: "Abierta", ubicacion
+    };
+    setIncidencia([...incidencias, nueva]);
+  };
 
-            }}
+  return (
+    <div
+      className="min-vh-100 d-flex flex-column"
+      style={{
+        backgroundImage: `url(${Fondo})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed"
+      }}
+    >
+      <Header />
 
-        >
+      <div className="container flex-grow-1 d-flex align-items-center justify-content-center">
+        
+        {!usuarioLogueado ? (
+          <div className="col-12 col-md-4">
+            <Login onLogin={onLogin} />
+          </div>
+        ) : (
+          <div className="row w-100 justify-content-center align-items-start g-4 py-5">
+            
+            <main className="col-md-7">
+              <div className="card p-4 shadow-sm bg-white">
+                <p className="d-flex justify-content-between align-items-center">
+                  <span><strong>Usuario:</strong> {usuarioLogueado.nombre || usuarioLogueado.email}</span>
+                  <button className="btn btn-outline-danger btn-sm" onClick={onLogout}>Cerrar sesión</button>
+                </p>
+                <hr />
+                <MiLista incidencias={incidencias} />
+              </div>
+            </main>
 
-            <Header />
+            <aside className="col-md-5">
+              <div className="card p-4 shadow-sm bg-white">
+                <Form agregarIncidencia={agregarIncidencia} />
+              </div>
+            </aside>
+          </div>
+        )}
+        
+      </div>
 
-            <div className="container-fluid">
-
-                <h2 className="mb-4 text-center mt-3">Mi aplicación</h2>
-
-                <div className="row">
-
-                    <aside className="col-md-6">
-
-                        <div className="card p-3 mb-3 shadow-sm">
-
-                            <h4>Lista de Incidencias</h4>
-
-                            <p className="text-muted">Contenido almacenado en mi app</p>
-
-                            <MiLista incidencias={incidencias} />
-
-                        </div>
-
-                    </aside>
-
-                    <main className="col-md-6">
-
-                        <Form agregarIncidencia={agregarIncidencia} />
-
-                    </main>
-
-                </div>
-
-            </div>
-
-            <Footer />
-
-        </div>
-
-    );
-
+      <Footer />
+    </div>
+  );
 }
 
-
-export default App; 
+export default App;
