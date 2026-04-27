@@ -8,33 +8,25 @@ import Fondo from '../img/fondo-vector-monocromo-blanco-abstracto-folleto-diseno
 
 const LOGIN_API_URL = "http://localhost:3004/login";
 const USERS_API_URL = "http://localhost:3004/users";
+const INCIDENCIAS_API_URL = "http://localhost:3004/incidencias";
 
 function App() {
   const [usuarioLogueado, setUsuarioLogueado] = useState(null);
   const [usuarios, setUsuarios] = useState([]);
-  const [incidencias, setIncidencia] = useState([
-    {
-      id_incidencia: 1,
-      id_usuario: "gme60348",
-      titulo: "Proyecto averiado en el aula 2",
-      descripcion: "Proyecto averiado en el aula 2",
-      categoria: "Hardware",
-      nivel_urgencia: "Media",
-      fecha_registro: "2025-10-20",
-      estado: "Abierta",
-      ubicacion: "B205"
-    }
-  ]);
+  const [incidencias, setIncidencias] = useState([]);
 
-  // 1. Cargar lista de usuarios al arrancar
   useEffect(() => {
     fetch(USERS_API_URL)
       .then(res => res.json())
       .then(data => setUsuarios(data))
-      .catch(err => console.error("Error cargando usuarios:", err));
+      .catch(err => console.error(err));
+
+    fetch(INCIDENCIAS_API_URL)
+      .then(res => res.json())
+      .then(data => setIncidencias(data))
+      .catch(err => console.error(err));
   }, []);
 
-  // 2. Persistencia manual (Sin librerías)
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (token && usuarios.length > 0) {
@@ -69,7 +61,7 @@ function App() {
 
       const userData = await response.json();
       localStorage.setItem("authToken", userData.accessToken);
-      localStorage.removeItem("usuarioLogin"); // Limpieza de la clave antigua
+      localStorage.removeItem("usuarioLogin");
       setUsuarioLogueado(userData.user);
     } catch (error) {
       alert("Error: " + error.message);
@@ -81,15 +73,32 @@ function App() {
     setUsuarioLogueado(null);
   };
 
-  const agregarIncidencia = (titulo, usuario, descripcion, categoria, urgencia, ubicacion) => {
+  const agregarIncidencia = async (titulo, usuario, descripcion, categoria, urgencia, ubicacion) => {
     const nueva = {
-      id_incidencia: incidencias.length + 1,
       id_usuario: usuario,
-      titulo, descripcion, categoria, nivel_urgencia: urgencia,
+      titulo, 
+      descripcion, 
+      categoria, 
+      nivel_urgencia: urgencia,
       fecha_registro: new Date().toISOString().split("T")[0],
-      estado: "Abierta", ubicacion
+      estado: "Abierta", 
+      ubicacion
     };
-    setIncidencia([...incidencias, nueva]);
+
+    try {
+      const response = await fetch(INCIDENCIAS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nueva)
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setIncidencias([...incidencias, data]);
+      }
+    } catch (error) {
+      alert("Error al guardar la incidencia");
+    }
   };
 
   return (
