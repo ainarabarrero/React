@@ -16,15 +16,21 @@ function App() {
   const [incidencias, setIncidencias] = useState([]);
 
   useEffect(() => {
-    fetch(USERS_API_URL)
-      .then(res => res.json())
-      .then(data => setUsuarios(data))
-      .catch(err => console.error(err));
+    const cargarDatos = async () => {
+      try {
+        const resUsers = await fetch(USERS_API_URL);
+        const dataUsers = await resUsers.json();
+        setUsuarios(dataUsers);
 
-    fetch(INCIDENCIAS_API_URL)
-      .then(res => res.json())
-      .then(data => setIncidencias(data))
-      .catch(err => console.error(err));
+        const resIncidencias = await fetch(INCIDENCIAS_API_URL);
+        const dataIncidencias = await resIncidencias.json();
+        setIncidencias(dataIncidencias);
+      } catch (error) {
+        console.error("Error al cargar los datos:", error);
+      }
+    };
+
+    cargarDatos();
   }, []);
 
   useEffect(() => {
