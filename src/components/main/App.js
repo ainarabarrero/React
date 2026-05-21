@@ -4,6 +4,9 @@ import MiLista from '../lista/IncidentList';
 import Form from '../Form';
 import Login from '../Login';
 import React, { useState, useEffect } from "react";
+import Menu from '../../Menu';
+import UserRoleManagement from '../../UserRoleManagement';
+import { Routes, Route } from "react-router-dom";
 import Fondo from '../img/fondo-vector-monocromo-blanco-abstracto-folleto-diseno-folleto-sitio-web-fondo-pantalla-blanco-geometrico-pagina-inicio-presentacion-certificado_249611-5879.avif'
 
 const LOGIN_API_URL = "http://localhost:3004/login";
@@ -107,6 +110,62 @@ function App() {
     }
   };
 
+  const cerrarIncidencia = async (id) => {
+      try {
+        const response = await fetch(`${INCIDENCIAS_API_URL}/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ estado: "Cerrada" })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setIncidencias(incidencias.map(inc => inc.id === id ? data : inc));
+        }
+      } catch (error) {
+        alert("Error al cerrar la incidencia");
+      }
+    };
+
+
+    const agregarUsuario = async (nuevoUsuario) => {
+    try {
+      const response = await fetch(USERS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nuevoUsuario)
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUsuarios([...usuarios, data]);
+      }
+    } catch (error) {
+      alert("Error al guardar el usuario");
+    }
+  };
+
+
+  const cambiarRol = async (emailUsuario) => {
+    try {
+      const usuario = usuarios.find(u => u.email === emailUsuario);
+      if (!usuario) return;
+      const nuevoRol = usuario.rol?.nombre_rol === "admin"
+        ? { id: 1, nombre_rol: "comun", descripcion: "Usuario regular del sistema" }
+        : { id: 2, nombre_rol: "admin", descripcion: "Administrador del sistema con permisos totales" };
+      const response = await fetch(`${USERS_API_URL}/${usuario.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rol: nuevoRol })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUsuarios(usuarios.map(u => u.id === usuario.id ? data : u));
+      }
+    } catch (error) {
+      alert("Error al cambiar el rol");
+    }
+  };
+
+
   return (
     <div
       className="min-vh-100 d-flex flex-column"
@@ -126,26 +185,43 @@ function App() {
             <Login onLogin={onLogin} />
           </div>
         ) : (
-          <div className="row w-100 justify-content-center align-items-start g-4 py-5">
-            
-            <main className="col-md-7">
-              <div className="card p-4 shadow-sm bg-white">
-                <p className="d-flex justify-content-between align-items-center">
-                  <span><strong>Usuario:</strong> {usuarioLogueado.nombre || usuarioLogueado.email}</span>
-                  <button className="btn btn-outline-danger btn-sm" onClick={onLogout}>Cerrar sesión</button>
-                </p>
-                <hr />
-                <MiLista incidencias={incidencias} />
-              </div>
-            </main>
-
-            <aside className="col-md-5">
-              <div className="card p-4 shadow-sm bg-white">
-                <Form agregarIncidencia={agregarIncidencia} />
-              </div>
-            </aside>
-          </div>
-        )}
+  <div className="w-100 py-4">
+    <Menu usuarioLogueado={usuarioLogueado} onLogout={onLogout} />
+    <Routes>
+      <Route path="/" element={
+        <div className="card p-4 shadow-sm bg-white col-md-8 mx-auto">
+          <h2 className="text-center mb-3">Bienvenido/a a la gestión de incidencias</h2>
+          <p className="text-center mb-0">
+            Hola <strong>{usuarioLogueado?.nombre || usuarioLogueado?.email}</strong>,
+            selecciona una opción del menú para comenzar.
+          </p>
+        </div>
+      } />
+      <Route path="/incidencias" element={
+        <div className="card p-4 shadow-sm bg-white">
+          <MiLista
+            incidencias={incidencias}
+            usuarioLogueado={usuarioLogueado}
+            cerrarIncidencia={cerrarIncidencia}
+          />
+        </div>
+      } />
+      <Route path="/registrar" element={
+        <div className="card p-4 shadow-sm bg-white col-md-7 mx-auto">
+          <Form agregarIncidencia={agregarIncidencia} />
+        </div>
+      } />
+      <Route path="/usuarios" element={
+        <UserRoleManagement
+          usuarios={usuarios}
+          agregarUsuario={agregarUsuario}
+          cambiarRol={cambiarRol}
+          usuarioLogueado={usuarioLogueado}
+        />
+      } />
+    </Routes>
+  </div>
+)}
         
       </div>
 
