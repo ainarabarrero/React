@@ -19,7 +19,7 @@ function Login({ onLogin }) {
     <div className="card p-4 shadow">
       <h2 className="mb-4 text-center">Iniciar sesión</h2>
 
-      {/* ✅ FORM REAL */}
+      {/*  FORM REAL */}
       <form onSubmit={handleSubmit}>
         
         <div className="mb-3">
